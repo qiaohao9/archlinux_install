@@ -267,6 +267,22 @@ function uefi_bios_detect() {
     fi
 }
 
+function system_install() {
+
+    # Install system-base
+    yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
+    yes '' | genfstab -U /mnt >> /mnt/etc/fstab
+}
+
+function install() {
+    confirm_operation "Operation is irreversible, Are you sure?"
+    if [[ ${OPTION} = "y" ]]; then
+        system_install
+    else
+        return
+    fi
+}
+
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
 print_info "The Arch Install Scripts are a set of Bash scripts that simplify Arch installation."
 uefi_bios_detect
@@ -298,6 +314,7 @@ while true; do
             5) set_hostname && checklist[5]=1;;
             6) set_root_password && checklist[6]=1;;
             7) set_login_user && checklist[7]=1;;
+            "i") install;;
             "q") exit 0;;
             *) invalid_option;;
         esac
