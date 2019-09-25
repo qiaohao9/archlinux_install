@@ -190,7 +190,7 @@ function select_languages() {
         for OPT in ${OPTIONS[@]}; do
             language=${languages[$(( ${OPT} - 1 ))]}
             if [[ ${language} ]]; then
-                LANGUAGES=( ${language} ${LANGUAGES[@]})
+                LANGUAGES=( "${language}.UTF-8" ${LANGUAGES[@]})
             fi
         done
 
