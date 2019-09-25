@@ -263,6 +263,17 @@ function select_languages() {
     done
 }
 
+function configure_languages() {
+    local languages_utf8=""
+    for languages in ${LANGUAGES[@]}; do
+        languages_utf8+="${languages} "
+        arch_chroot "sed -i 's/#\('${languages}'\)/\1/' /etc/locale.gen"
+    done
+
+    echo "LANG=${languages_utf8}" > ${MOUNT_POINT}/etc/locale.conf
+    arch_chroot "locale-gen"
+}
+
 function set_hostname() {
     local result
     read -p "Input your Hostname[ex: ${HOSTNAME}}]: " result
@@ -332,6 +343,7 @@ function system_install() {
     yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
 
+    configure_languages
     configure_hostname
     configure_user
 }
