@@ -111,7 +111,7 @@ function set_password() {
 }
 
 
-UEFI_BIOS_TEXT=
+UEFI_BIOS_TEXT="Boot Not Detected"
 INSTALL_DEVICE=
 MIRRORLIST_COUNTRIES=()
 LANGUAGES=()
@@ -247,13 +247,34 @@ function set_login_user() {
     set_password ${USER_NAME} USER_PASSWORD ${USER_PASSWORD}
 }
 
+function uefi_bios_detect() {
+    if [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Inc.' ]] || [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Computer, Inc.' ]]; then
+        modprobe -r -q efivars || true  # if MAC
+    else
+        modprobe -q efivarfs            # all others
+    fi
+
+    if [[ -d "/sys/firmware/efi/" ]]; then
+        ## Mount efivarfs if it is not already mounted
+        if [[ -z $(mount | grep /sys/firmware/efi/efivars) ]]; then
+            mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+        fi
+        UEFI=1
+        UEFI_BIOS_TEXT="UEFI detected"
+    else
+        UEFI=0
+        UEFI_BIOS_TEXT="BIOS detected"
+    fi
+}
+
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
 print_info "The Arch Install Scripts are a set of Bash scripts that simplify Arch installation."
+uefi_bios_detect
 pause
 checklist=( 0 0 0 0 0 0 0 )
 while true; do
     print_title "ARCHLINUX ULTIMATE INSTALL - https://github.com/vastpeng/aui"
-    echo " ${UEFI_BIOS_TEXT:=Boot Not Detected}"
+    echo " ${UEFI_BIOS_TEXT}"
     echo ""
     echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
