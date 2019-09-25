@@ -93,8 +93,10 @@ function confirm_operation() {
 
 
 UEFI_BIOS_TEXT=
-install_device=
-mirrorlist_counties=()
+INSTALL_DEVICE=
+MIRRORLIST_COUNTRIES=()
+ZONE=
+SUBZONE=
 
 function select_mirrorlist() {
     print_title "MIRRORLIST - https://wiki.dex.php/Mirrors"
@@ -111,12 +113,12 @@ function select_mirrorlist() {
         for OPT in ${OPTIONS[@]}; do
             country_code=${countries_code[$(( $OPT - 1 ))]}
             if [[ ${country_code} ]]; then
-                mirrorlist_counties=( ${country_code} ${mirrorlist_counties[@]} )
+                MIRRORLIST_COUNTRIES=( ${country_code} ${MIRRORLIST_COUNTRIES[@]} )
             fi
         done
 
-        mirrorlist_counties=($(echo "${mirrorlist_counties[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-        if [[ ${#mirrorlist_counties} -eq 0 ]]; then
+        MIRRORLIST_COUNTRIES=($(echo "${MIRRORLIST_COUNTRIES[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+        if [[ ${#MIRRORLIST_COUNTRIES} -eq 0 ]]; then
             return 1
         fi
         break
@@ -139,11 +141,37 @@ function select_device() {
     done
 
     if [[ ${OPTION} == "y" ]]; then
-        install_device=${device}
+        INSTALL_DEVICE=${device}
         return 0
     fi
 
     return 1
+}
+
+function select_timezone() {
+    print_title "HARDWARE CLOCK TIME - https://wiki.archlinux.org/index.php/Internationalization"
+    print_info "This is set in /etc/adjtime. Set the hardware clock mode uniformly between your operating systems on the same machine. Otherwise, they will overwrite the time and cause clock shifts (which can cause time drift correction to be miscalibrated)."
+
+    local timezones=(`timedatectl list-timezones | sed 's/\/.*$//' | uniq`)
+    PS3=${PROMPT_1}
+    echo "Select zone:"
+    select ZONE in ${timezones[@]}; do
+        if contains_element ${zone} ${timezones[@]}; then
+            local _subzones=(`timedatectl list-timezones | grep ${ZONE} | sed 's/^.*\///'`)
+            PS3="$prompt1"
+            echo "Select subzone:"
+            select SUBZONE in "${_subzones[@]}"; do
+                if contains_element "$SUBZONE" "${_subzones[@]}"; then
+                    break
+                else
+                    invalid_option
+                fi
+            done
+            break
+        else
+            invalid_option
+        fi
+    done
 }
 
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
@@ -154,8 +182,8 @@ while true; do
     print_title "ARCHLINUX ULTIMATE INSTALL - https://github.com/vastpeng/aui"
     echo " ${UEFI_BIOS_TEXT:=Boot Not Detected}"
     echo ""
-    echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${mirrorlist_counties[*]}" )"
-    echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${install_device}" )"
+    echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
+    echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
     echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${locale_utf8[*]}" )"
     echo " 5) $(mainmenu_item "${checklist[5]}"  "Configure Hostname"         "${host_name}" )"
@@ -171,6 +199,7 @@ while true; do
         case ${OPT} in
             1) select_mirrorlist && checklist[1]=1;;
             2) select_device && checklist[2]=1;;
+            3) select_timezone && checklist[3]=1;;
             "q") exit 0;;
             *) invalid_option;;
         esac
