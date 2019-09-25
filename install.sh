@@ -86,6 +86,10 @@ function contains_element() {
     for e in in "${@:2}"; do [[ ${e} == ${1} ]] && break; done;
 }
 
+function unique_elements() {
+    RESULT_UNIQUE_ELEMENTS=($(echo $@ | tr ' ' '\n' | sort -u | tr '\n' ' '))
+}
+
 function confirm_operation() {
     read -p "${BYellow}$1 [y/N]: ${Reset}" OPTION
     OPTION=`echo "${OPTION}" | tr '[:upper:]' '[:lower:]'`    
@@ -117,7 +121,8 @@ function select_mirrorlist() {
             fi
         done
 
-        MIRRORLIST_COUNTRIES=($(echo "${MIRRORLIST_COUNTRIES[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+        unique_elements ${MIRRORLIST_COUNTRIES[@]}
+        MIRRORLIST_COUNTRIES=( ${RESULT_UNIQUE_ELEMENTS[@]} )
         if [[ ${#MIRRORLIST_COUNTRIES} -eq 0 ]]; then
             return 1
         fi
