@@ -116,6 +116,10 @@ function set_password() {
     done 
 }
 
+function arch_chroot() {
+    arch-chroot $MOUNT_POINT /bin/bash -c "${1}"
+}
+
 
 UEFI_BIOS_TEXT="Boot Not Detected"
 INSTALL_DEVICE=
@@ -127,6 +131,8 @@ HOSTNAME="archlinux"
 ROOT_PASSWORD=
 USER_NAME="arch"
 USER_PASSWORD="123456"
+
+MOUNT_POINT="/mnt"
 
 function select_mirrorlist() {
     print_title "MIRRORLIST - https://wiki.dex.php/Mirrors"
@@ -264,11 +270,26 @@ function set_hostname() {
     fi
 }
 
+function configure_hostname() {
+    if [[ -e "${MOUNT_POINT}/etc/hostname" ]]; then mv  -f "${MOUNT_POINT}/etc/hostname" "${MOUNT_POINT}/etc/hostname.orig" fi
+    if [[ -e "${MOUNT_POINT}/etc/hosts" ]]; then mv  -f "${MOUNT_POINT}/etc/hosts" "${MOUNT_POINT}/etc/hosts.orig" fi
+
+    echo "{$HOSTNAME}" > ${MOUNT_POINT}/etc/hostname
+
+    arch_chroot "echo '127.0.0.1  localhost ${HOSTNAME} ${HOSTNAME}.localdomain' >> /etc/hosts"
+    arch_chroot "echo '::1        localhost ${HOSTNAME} ${HOSTNAME}.localdomain' >> /etc/hosts"
+}
+
 function set_root_password() {
     set_password root ROOT_PASSWORD
     if [[ ! ${ROOT_PASSWORD} ]]; then
         return 1
     fi
+}
+
+function configure_user() {
+    arch_chroot 'echo "root:${ROOT_PASSWORD}" | chpasswd'
+    arch_chroot 'useradd -m -s $(which zsh) -G wheel ${USER_NAME} && echo "${USER_PASSWORD}:${USER_PASSWORD}" | chpasswd'
 }
 
 function set_login_user() {
@@ -304,9 +325,14 @@ function uefi_bios_detect() {
 
 function system_install() {
 
+    configure_mirrorlist
+
     # Install system-base
     yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
+
+    configure_hostname
+    configure_user
 }
 
 function install() {
