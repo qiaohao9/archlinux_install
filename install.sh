@@ -89,6 +89,7 @@ function confirm_operation() {
 
 
 UEFI_BIOS_TEXT=
+install_device=
 
 function select_mirrorlist() {
     print_title "MIRRORLIST - https://wiki.dex.php/Mirrors"
@@ -99,7 +100,29 @@ function select_mirrorlist() {
 
     PS3=${PROMPT_2}
     echo "Select your country:"
+    
+}
 
+function select_device() {
+    # TODO
+    devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 '`)
+    PS3=${PROMPT_1}
+    echo -e "Select device to install Arch Linux:\n"
+    select device in "${devices_list[@]}"; do
+        if contains_element ${device} ${devices_list[@]}; then 
+            confirm_operation "Data on ${device} will be damaged"
+            break
+        else
+            invalid_option
+        fi
+    done
+
+    if [[ ${OPTION} == "y" ]]; then
+        install_device=${device}
+        return 0
+    fi
+
+    return 1
 }
 
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
@@ -125,6 +148,7 @@ while true; do
     read_input_options
     for OPT in ${OPTIONS[@]}; do
         case ${OPT} in
+            2) select_device && checklist[2]=1;;
             "q") exit 0;;
             *) invalid_option;;
         esac
