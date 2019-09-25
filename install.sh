@@ -19,6 +19,12 @@ function print_line() {
     printf "%$(tput cols)s\n" | tr ' ' '-'
 }
 
+function print_error() { 
+    T_COLS=`tput cols`
+    echo -e "\n\n${BRed}$1${Reset}\n" | fold -sw $(( $T_COLS - 1 ))
+    sleep 3
+}
+
 function print_title() {
     clear
     print_line
@@ -150,6 +156,34 @@ function select_mirrorlist() {
     
 }
 
+function configure_mirrorlist() {
+    local params=""
+    for country in ${MIRRORLIST_COUNTRIES[@]}; do
+        params+="country=${country}&"
+    done
+    url="https://www.archlinux.org/mirrorlist/?${params}protocol=http&protocol=https&ip_version=4&ip_version=6"
+
+    # Get latest mirror list and save to tmpfile
+    tmpfile=$(mktemp --suffix=-mirrorlist)
+    curl -Lo ${tmpfile} ${url}
+    sed -i 's/^#Server/Server/g' ${tmpfile}
+
+    # Backup and replace current mirrorlist file (if new file is non-zero)
+    if [[ -s ${tmpfile} ]]; then
+        { echo " Backing up the original mirrorlist..."
+            mv -f /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig; } &&
+        { echo " Rotating the new list into place..."
+            mv -f ${tmpfile} /etc/pacman.d/mirrorlist; }
+    else
+        print_error " Unable to update, could not download list."
+    fi
+
+    pacman -S pacman-contrib --noconfirm
+    cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
+    rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
+    rm /etc/pacman.d/mirrorlist.tmp
+}
+
 function select_device() {
     local devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 }'`)
     PS3=${PROMPT_1}
@@ -266,6 +300,7 @@ function uefi_bios_detect() {
         UEFI_BIOS_TEXT="BIOS detected"
     fi
 }
+
 
 function system_install() {
 
