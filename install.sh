@@ -62,7 +62,11 @@ function read_input_options() {
     local line
     local packages
 
-    read -p "${PROMPT_2}" OPTION
+    if [[ ! $@ ]]; then
+        read -p "${PROMPT_2}" OPTION
+    else
+        OPTION=$@
+    fi
     array=(${OPTION})
 
     for line in ${array[@]/,/ }; do
@@ -90,6 +94,7 @@ function confirm_operation() {
 
 UEFI_BIOS_TEXT=
 install_device=
+mirrorlist_counties=()
 
 function select_mirrorlist() {
     print_title "MIRRORLIST - https://wiki.dex.php/Mirrors"
@@ -100,12 +105,28 @@ function select_mirrorlist() {
 
     PS3=${PROMPT_2}
     echo "Select your country:"
+    select country_name in ${countries_name[@]}; do
+        echo ""
+        read_input_options $REPLY
+        for OPT in ${OPTIONS[@]}; do
+            country_code=${countries_code[$(( $OPT - 1 ))]}
+            if [[ ${country_code} ]]; then
+                mirrorlist_counties=( ${country_code} ${mirrorlist_counties[@]} )
+            fi
+        done
+
+        mirrorlist_counties=($(echo "${mirrorlist_counties[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+        if [[ ${#mirrorlist_counties} -eq 0 ]]; then
+            return 1
+        fi
+        break
+    done
     
 }
 
 function select_device() {
     # TODO
-    devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 '`)
+    local devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 '`)
     PS3=${PROMPT_1}
     echo -e "Select device to install Arch Linux:\n"
     select device in "${devices_list[@]}"; do
@@ -133,7 +154,7 @@ while true; do
     print_title "ARCHLINUX ULTIMATE INSTALL - https://github.com/vastpeng/aui"
     echo " ${UEFI_BIOS_TEXT:=Boot Not Detected}"
     echo ""
-    echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${country_codes[*]}" )"
+    echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${mirrorlist_counties[*]}" )"
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${install_device}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
     echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${locale_utf8[*]}" )"
@@ -148,6 +169,7 @@ while true; do
     read_input_options
     for OPT in ${OPTIONS[@]}; do
         case ${OPT} in
+            1) select_mirrorlist && checklist[1]=1;;
             2) select_device && checklist[2]=1;;
             "q") exit 0;;
             *) invalid_option;;
