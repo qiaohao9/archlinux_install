@@ -270,7 +270,7 @@ function configure_languages() {
         arch_chroot "sed -i 's/#\('${languages}'\)/\1/' /etc/locale.gen"
     done
 
-    echo "LANG=${languages_utf8}" > ${MOUNT_POINT}/etc/locale.conf
+    echo "LANG=${LANG}" > ${MOUNT_POINT}/etc/locale.conf
     arch_chroot "locale-gen"
 }
 
@@ -283,8 +283,12 @@ function set_hostname() {
 }
 
 function configure_hostname() {
-    if [[ -e "${MOUNT_POINT}/etc/hostname" ]]; then mv  -f "${MOUNT_POINT}/etc/hostname" "${MOUNT_POINT}/etc/hostname.orig" fi
-    if [[ -e "${MOUNT_POINT}/etc/hosts" ]]; then mv  -f "${MOUNT_POINT}/etc/hosts" "${MOUNT_POINT}/etc/hosts.orig" fi
+    if [[ -e "${MOUNT_POINT}/etc/hostname" ]]; then 
+        mv  -f "${MOUNT_POINT}/etc/hostname" "${MOUNT_POINT}/etc/hostname.orig" 
+    fi
+    if [[ -e "${MOUNT_POINT}/etc/hosts" ]]; 
+        then mv  -f "${MOUNT_POINT}/etc/hosts" "${MOUNT_POINT}/etc/hosts.orig" 
+    fi
 
     echo "{$HOSTNAME}" > ${MOUNT_POINT}/etc/hostname
 
@@ -343,7 +347,6 @@ function system_install() {
     yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
 
-    configure_languages
     configure_hostname
     configure_user
 }
