@@ -106,7 +106,7 @@ function select_mirrorlist() {
     local countries_name=("Australia" "Austria" "Belarus" "Belgium" "Brazil" "Bulgaria" "Canada" "Chile" "China" "Colombia" "Czech Republic" "Denmark" "Estonia" "Finland" "France" "Germany" "Greece" "Hong Kong" "Hungary" "Indonesia" "India" "Iran" "Ireland" "Israel" "Italy" "Japan" "Kazakhstan" "Korea" "Latvia" "Luxembourg" "Macedonia" "Netherlands" "New Caledonia" "New Zealand" "Norway" "Poland" "Portugal" "Romania" "Russia" "Serbia" "Singapore" "Slovakia" "South Africa" "Spain" "Sri Lanka" "Sweden" "Switzerland" "Taiwan" "Turkey" "Ukraine" "United Kingdom" "United States" "Uzbekistan" "Viet Nam")
 
     PS3=${PROMPT_2}
-    echo "Select your country:"
+    echo -e "Select your country:\n"
     select country_name in ${countries_name[@]}; do
         echo ""
         read_input_options $REPLY
@@ -127,8 +127,7 @@ function select_mirrorlist() {
 }
 
 function select_device() {
-    # TODO
-    local devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 '`)
+    local devices_list=(`lsblk -d | awk 'NR>1 { print "/dev/" $1 }'`)
     PS3=${PROMPT_1}
     echo -e "Select device to install Arch Linux:\n"
     select device in "${devices_list[@]}"; do
@@ -154,11 +153,11 @@ function select_timezone() {
 
     local timezones=(`timedatectl list-timezones | sed 's/\/.*$//' | uniq`)
     PS3=${PROMPT_1}
-    echo "Select zone:"
+    echo -e "Select zone:\n"
     select ZONE in ${timezones[@]}; do
-        if contains_element ${zone} ${timezones[@]}; then
+        if contains_element ${ZONE} ${timezones[@]}; then
             local _subzones=(`timedatectl list-timezones | grep ${ZONE} | sed 's/^.*\///'`)
-            PS3="$prompt1"
+            PS3="${PROMPT_1}"
             echo "Select subzone:"
             select SUBZONE in "${_subzones[@]}"; do
                 if contains_element "$SUBZONE" "${_subzones[@]}"; then
@@ -172,6 +171,12 @@ function select_timezone() {
             invalid_option
         fi
     done
+}
+
+function select_languages() {
+    print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
+    print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
+
 }
 
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
@@ -200,6 +205,7 @@ while true; do
             1) select_mirrorlist && checklist[1]=1;;
             2) select_device && checklist[2]=1;;
             3) select_timezone && checklist[3]=1;;
+            4) select_languages && checklist[4]=1;;
             "q") exit 0;;
             *) invalid_option;;
         esac
