@@ -96,12 +96,31 @@ function confirm_operation() {
 }
 
 
+function set_password() {
+    while true; do
+        read -s -p "Password for $1: " password1
+        echo
+        read -s -p "Confirm the password: " password2
+        echo
+        if [[ ${password1} == ${password2} ]]; then
+            eval $2=${password1}
+            break
+        fi
+        echo "Please try again"
+    done 
+}
+
+
 UEFI_BIOS_TEXT=
 INSTALL_DEVICE=
 MIRRORLIST_COUNTRIES=()
 LANGUAGES=()
 ZONE=
 SUBZONE=
+HOSTNAME="archlinux"
+ROOT_PASSWORD=
+USER_NAME="arch"
+USER_PASSWORD="123456"
 
 function select_mirrorlist() {
     print_title "MIRRORLIST - https://wiki.dex.php/Mirrors"
@@ -203,6 +222,31 @@ function select_languages() {
     done
 }
 
+function set_hostname() {
+    local result
+    read -p "Input your Hostname[ex: ${HOSTNAME}}]: " result
+    if [[ ! -z ${result} ]]; then 
+        HOSTNAME=${result}
+    fi
+}
+
+function set_root_password() {
+    set_password root ROOT_PASSWORD
+    if [[ ! ${ROOT_PASSWORD} ]]; then
+        return 1
+    fi
+}
+
+function set_login_user() {
+    local result
+    read -p "Input login user name[ex: ${USER_NAME}]: " result
+    if [[ ! -z ${result} ]]; then 
+        USER_NAME=${result}
+    fi
+    
+    set_password ${USER_NAME} USER_PASSWORD ${USER_PASSWORD}
+}
+
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
 print_info "The Arch Install Scripts are a set of Bash scripts that simplify Arch installation."
 pause
@@ -215,9 +259,9 @@ while true; do
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
     echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${LANGUAGES[*]}" )"
-    echo " 5) $(mainmenu_item "${checklist[5]}"  "Configure Hostname"         "${host_name}" )"
-    echo " 6) $(mainmenu_item "${checklist[6]}"  "Root password"              "${root_password}" )"
-    echo " 7) $(mainmenu_item "${checklist[7]}"  "Set Usesr Info"             "${user_name}/${user_password}" )"
+    echo " 5) $(mainmenu_item "${checklist[5]}"  "Set Hostname"               "${HOSTNAME}" )"
+    echo " 6) $(mainmenu_item "${checklist[6]}"  "Set Root Password"          "${ROOT_PASSWORD}" )"
+    echo " 7) $(mainmenu_item "${checklist[7]}"  "Set Login User"             "${USER_NAME}/${USER_PASSWORD}" )"
     echo ""
     echo " i) install"
     echo " q) quit"
@@ -230,6 +274,9 @@ while true; do
             2) select_device && checklist[2]=1;;
             3) select_timezone && checklist[3]=1;;
             4) select_languages && checklist[4]=1;;
+            5) set_hostname && checklist[5]=1;;
+            6) set_root_password && checklist[6]=1;;
+            7) set_login_user && checklist[7]=1;;
             "q") exit 0;;
             *) invalid_option;;
         esac
