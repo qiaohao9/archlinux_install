@@ -23,6 +23,7 @@ function print_error() {
     T_COLS=`tput cols`
     echo -e "\n\n${BRed}$1${Reset}\n" | fold -sw $(( $T_COLS - 1 ))
     sleep 3
+    return 1
 }
 
 function print_title() {
