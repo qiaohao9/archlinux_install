@@ -99,6 +99,7 @@ function confirm_operation() {
 UEFI_BIOS_TEXT=
 INSTALL_DEVICE=
 MIRRORLIST_COUNTRIES=()
+LANGUAGES=()
 ZONE=
 SUBZONE=
 
@@ -111,8 +112,7 @@ function select_mirrorlist() {
 
     PS3=${PROMPT_2}
     echo -e "Select your country:\n"
-    select country_name in ${countries_name[@]}; do
-        echo ""
+    select v in ${countries_name[@]}; do
         read_input_options $REPLY
         for OPT in ${OPTIONS[@]}; do
             country_code=${countries_code[$(( $OPT - 1 ))]}
@@ -182,6 +182,25 @@ function select_languages() {
     print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
     print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
 
+    local languages=(`cat /etc/locale.gen | grep UTF-8 | sed 's/\..*$//' | sed '/@/d' | awk '{print $1}' | uniq | sed 's/#//g'`);
+    PS3=${PROMPT_2}
+    echo -e "Select locale:\n"
+    select v in "${languages[@]}" Done; do
+        read_input_options $REPLY
+        for OPT in ${OPTIONS[@]}; do
+            language=${languages[$(( ${OPT} - 1 ))]}
+            if [[ ${language} ]]; then
+                LANGUAGES=( ${language} ${LANGUAGES[@]})
+            fi
+        done
+
+        unique_elements ${LANGUAGES[@]}
+        LANGUAGES=( ${RESULT_UNIQUE_ELEMENTS[@]} )
+        if [[ ${#LANGUAGES} -eq 0 ]]; then
+            return 1
+        fi
+        break
+    done
 }
 
 print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
@@ -195,7 +214,7 @@ while true; do
     echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
-    echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${locale_utf8[*]}" )"
+    echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${LANGUAGES[*]}" )"
     echo " 5) $(mainmenu_item "${checklist[5]}"  "Configure Hostname"         "${host_name}" )"
     echo " 6) $(mainmenu_item "${checklist[6]}"  "Root password"              "${root_password}" )"
     echo " 7) $(mainmenu_item "${checklist[7]}"  "Set Usesr Info"             "${user_name}/${user_password}" )"
