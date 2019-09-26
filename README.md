@@ -1,4 +1,4 @@
-![GUI](https://raw.githubusercontent.com/vastpeng/pic-storage/master/AyfjAN.png)
+![](https://raw.githubusercontent.com/vastpeng/pic-storage/master/ND6Zjw.png)
 
 # What's this?
 
