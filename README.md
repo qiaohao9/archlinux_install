@@ -12,7 +12,7 @@ ArchLinux 自动安装脚本（inspired by [aui](https://github.com/helmuthdu/au
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_install/master/base_install.sh)"
 ```
 
-# Base_install Scripts
+# base_install Scripts
 
 * Configure Mirrorlist
 * Configure Lanuages
@@ -22,6 +22,14 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_insta
 * Format Devices / Create Partions
 * Install System Base
 * Install bootloader
+
+# extra_install Scripts(TODO)
+
+* Configure Shadowsocks-libev & Privoxy(For [GFW](https://en.wikipedia.org/wiki/Great_Firewall))
+* Configure Desktop(ex: i3wm)
+* Configure Fonts(ex: Unicode Chinese)
+* Downloading Common Apps
+
 
 # What's next?
 
