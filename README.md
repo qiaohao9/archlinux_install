@@ -10,6 +10,17 @@ ArchLinux 自动安装脚本（inspired by [aui](https://github.com/helmuthdu/au
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_install/master/install.sh)"
 ```
 
+# Scripts
+
+* Configure Mirrorlist
+* Configure Lanuages
+* Configure Timezone
+* Set Hostname
+* Set Root Password / Login User
+* Format Devices / Create Partions
+* Install System Base
+* Install bootloader
+
 # What's next?
 
 - [x] User-interface
