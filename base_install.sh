@@ -118,7 +118,7 @@ function set_password() {
 }
 
 function arch_chroot() {
-    arch-chroot $MOUNT_POINT "/bin/bash" -c "${1}"
+    arch-chroot ${MOUNT_POINT} "/bin/bash" -c "${1}"
 }
 
 
@@ -306,12 +306,13 @@ function select_languages() {
 
 function configure_languages() {
     local languages_utf8=""
-    for languages in ${LANGUAGES[@]}; do
-        languages_utf8+="${languages} "
-        arch_chroot "sed -i 's/#\('${languages}'\)/\1/' /etc/locale.gen"
+    for language in ${LANGUAGES[@]}; do
+        languages_utf8+="${language} "
+        arch_chroot "sed -i 's/#\('${language}'\)/\1/' /etc/locale.gen"
     done
+    exit
 
-    echo "LANG=${LANG}" > ${MOUNT_POINT}/etc/locale.conf
+    echo "LANG=${languages_utf8}" > "${MOUNT_POINT}/etc/locale.conf"
     arch_chroot "locale-gen"
 }
 
@@ -331,7 +332,7 @@ function configure_hostname() {
         then mv  -f "${MOUNT_POINT}/etc/hosts" "${MOUNT_POINT}/etc/hosts.orig" 
     fi
 
-    echo "{$HOSTNAME}" > ${MOUNT_POINT}/etc/hostname
+    echo "${HOSTNAME}" > "${MOUNT_POINT}/etc/hostname"
 
     arch_chroot "echo '127.0.0.1  localhost ${HOSTNAME} ${HOSTNAME}.localdomain' >> /etc/hosts"
     arch_chroot "echo '::1        localhost ${HOSTNAME} ${HOSTNAME}.localdomain' >> /etc/hosts"
@@ -345,8 +346,8 @@ function set_root_password() {
 }
 
 function configure_user() {
-    arch_chroot 'echo "root:${ROOT_PASSWORD}" | chpasswd'
-    arch_chroot 'useradd -m -s $(which zsh) -G wheel ${USER_NAME} && echo "${USER_NAME}:${USER_PASSWORD}" | chpasswd'
+    arch_chroot "echo 'root:${ROOT_PASSWORD}' | chpasswd"
+    arch_chroot "useradd -m -s $(which zsh) -G wheel ${USER_NAME} && echo '${USER_NAME}:${USER_PASSWORD}' | chpasswd"
 }
 
 function set_login_user() {
