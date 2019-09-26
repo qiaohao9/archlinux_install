@@ -212,7 +212,7 @@ function select_device() {
     return 1
 }
 
-function format_partions() {
+function format_devices() {
     # TODO 
     # Support LVM?
     sgdisk --zap-all ${INSTALL_DEVICE}
@@ -390,7 +390,7 @@ function bootloader_install() {
 
 
 function system_install() {
-    format_partions
+    format_devices
     configure_mirrorlist
 
     # Install system-base
