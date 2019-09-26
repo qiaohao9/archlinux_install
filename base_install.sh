@@ -385,7 +385,7 @@ function bootloader_uefi() {
 }
 
 function bootloader_bios() {
-    arch_chroot "grub-install ${INSTALL_DEVICE}2"
+    arch_chroot "grub-install ${INSTALL_DEVICE}"
     arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 }
 
@@ -417,6 +417,12 @@ function install() {
     confirm_operation "Operation is irreversible, Are you sure?"
     if [[ ${OPTION} = "y" ]]; then
         system_install
+
+        print_line
+        confirm_operation "Do you want to reboot system?"
+        if [[ ${OPTION} == "y" ]]; then
+           reboot 
+        fi
     else
         return
     fi
