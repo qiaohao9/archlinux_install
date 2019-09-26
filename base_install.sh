@@ -346,7 +346,7 @@ function set_root_password() {
 
 function configure_user() {
     arch_chroot 'echo "root:${ROOT_PASSWORD}" | chpasswd'
-    arch_chroot 'useradd -m -s $(which zsh) -G wheel ${USER_NAME} && echo "${USER_PASSWORD}:${USER_PASSWORD}" | chpasswd'
+    arch_chroot 'useradd -m -s $(which zsh) -G wheel ${USER_NAME} && echo "${USER_NAME}:${USER_PASSWORD}" | chpasswd'
 }
 
 function set_login_user() {
@@ -425,6 +425,7 @@ function install() {
         if [[ ${OPTION} == "y" ]]; then
            reboot 
         fi
+        exit 0
     else
         return
     fi
