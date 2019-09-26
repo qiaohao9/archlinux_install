@@ -408,7 +408,7 @@ function system_install() {
     configure_mirrorlist
 
     # Install system-base
-    yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
+    yes '' | pacstrap -i /mnt base base-devel grub os-prober openssh git zsh
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
 
     configure_timezone
@@ -416,6 +416,8 @@ function system_install() {
     configure_user
 
     bootloader_install
+
+    arch_chroot "systemctl enable dhcpcd sshd"
 }
 
 function install() {
