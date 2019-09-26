@@ -125,6 +125,7 @@ function arch_chroot() {
 UEFI_BIOS_TEXT="Boot Not Detected"
 INSTALL_DEVICE=
 MIRRORLIST_COUNTRIES=()
+RANK_MIRRORS=0
 LANGUAGES=()
 ZONE=
 SUBZONE=
@@ -158,6 +159,11 @@ function select_mirrorlist() {
         if [[ ${#MIRRORLIST_COUNTRIES} -eq 0 ]]; then
             return 1
         fi
+
+        confirm_operation "DO you want to rank mirrors?"
+        if [[ ${OPTION} == "y" ]]; then
+            RANK_MIRRORS=1
+        fi
         break
     done
     
@@ -185,11 +191,13 @@ function configure_mirrorlist() {
         print_error " Unable to update, could not download list."
     fi
 
-    pacman -S pacman-contrib --noconfirm
-    cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
-    print_info "Next, Ranking mirrors will take a so long time, wait..."
-    rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
-    rm /etc/pacman.d/mirrorlist.tmp
+    if [[ ${RANK_MIRRORS} -eq 1 ]]; then
+        pacman -S pacman-contrib --noconfirm
+        cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
+        print_info "Next, Ranking mirrors will take a so long time, wait..."
+        rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
+        rm /etc/pacman.d/mirrorlist.tmp
+    fi
 }
 
 function select_device() {
