@@ -163,6 +163,8 @@ function select_mirrorlist() {
         confirm_operation "DO you want to rank mirrors?"
         if [[ ${OPTION} == "y" ]]; then
             RANK_MIRRORS=1
+        else
+            RANK_MIRRORS=0
         fi
         break
     done
