@@ -238,6 +238,18 @@ function select_timezone() {
     done
 }
 
+function configure_timezone() {
+    print_title "TIMEZONE - https://wiki.archlinux.org/index.php/Timezone"
+    print_info "In an operating system the time (clock) is determined by four parts: Time value, Time standard, Time Zone, and DST (Daylight Saving Time if applicable)."
+
+    arch_chroot "ln -sf /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime"
+    arch_chroot "sed -i '/#NTP=/d' /etc/systemd/timesyncd.conf"
+    arch_chroot "sed -i 's/#Fallback//' /etc/systemd/timesyncd.conf"
+    arch_chroot "echo \"FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org\" >> /etc/systemd/timesyncd.conf"
+    arch_chroot "systemctl enable systemd-timesyncd.service"
+    arch_chroot "hwclock --systohc --localtime"
+}
+
 function select_languages() {
     print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
     print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
@@ -347,6 +359,7 @@ function system_install() {
     yes '' | pacstrap -i /mnt base base-devel grub os-prober git zsh neovim 
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
 
+    configure_timezone
     configure_hostname
     configure_user
 }
