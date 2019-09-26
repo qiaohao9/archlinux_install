@@ -215,15 +215,15 @@ function select_device() {
 function format_partions() {
     # TODO 
     # Support LVM?
-    sgdisk --zap-all ${install_device}
-    local boot_partion="${install_device}1"
-    local system_partion="${install_device}2"
+    sgdisk --zap-all ${INSTALL_DEVICE}
+    local boot_partion="${INSTALL_DEVICE}1"
+    local system_partion="${INSTALL_DEVICE}2"
 
     [[ ${UEFI_BIOS_TEXT} == "Boot Not Detected" ]] && print_error "Boot method isn't be detected!"
-    [[ ${UEFI_BIOS_TEXT} == "UEFI detected" ]] && printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk ${install_device} && yes | mkfs.fat -F32 ${boot_partion}
-    [[ ${UEFI_BIOS_TEXT} == "BIOS detected" ]] && printf "n\n1\n\n+2M\nef02\nw\ny\n" | gdisk ${install_device} && yes | mkfs.ext2 ${boot_partion}
+    [[ ${UEFI_BIOS_TEXT} == "UEFI detected" ]] && printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk ${INSTALL_DEVICE} && yes | mkfs.fat -F32 ${boot_partion}
+    [[ ${UEFI_BIOS_TEXT} == "BIOS detected" ]] && printf "n\n1\n\n+2M\nef02\nw\ny\n" | gdisk ${INSTALL_DEVICE} && yes | mkfs.ext2 ${boot_partion}
 
-    printf "n\n2\n\n\n8300\nw\ny\n"| gdisk ${install_device}
+    printf "n\n2\n\n\n8300\nw\ny\n"| gdisk ${INSTALL_DEVICE}
     yes | mkfs.ext4 ${system_partion}
 
     mount ${system_partion} /mnt
