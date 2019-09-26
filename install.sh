@@ -187,6 +187,7 @@ function configure_mirrorlist() {
 
     pacman -S pacman-contrib --noconfirm
     cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
+    print_info "Next, Ranking mirrors will take a so long time, wait..."
     rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
     rm /etc/pacman.d/mirrorlist.tmp
 }
