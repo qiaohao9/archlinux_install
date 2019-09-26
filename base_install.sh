@@ -118,7 +118,7 @@ function set_password() {
 }
 
 function arch_chroot() {
-    arch-chroot $MOUNT_POINT /bin/bash -c "${1}"
+    arch-chroot $MOUNT_POINT "/bin/bash" -c "${1}"
 }
 
 
