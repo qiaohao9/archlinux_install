@@ -240,7 +240,7 @@ function format_devices() {
     yes | mkfs.ext4 ${system_partion}
 
     mount ${system_partion} /mnt
-    [[ ${UEFI_BIOS_TEXT} -eq "UEFI detected" ]] && mkdir -p /mnt/boot/efi && mount ${boot_partion} /mnt/boot/efi
+    [[ ${UEFI_BIOS_TEXT} == "UEFI detected" ]] && mkdir -p /mnt/boot/efi && mount ${boot_partion} /mnt/boot/efi
 }
 
 function select_timezone() {
@@ -383,7 +383,7 @@ function uefi_bios_detect() {
 function bootloader_uefi() {
     arch_chroot "pacman -S efibootmgr --noconfirm"
     arch_chroot "grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi"
-    arch_chroot "mkdir /boot/efi/EFI/BOOT"
+    arch_chroot "mkdir -p /boot/efi/EFI/BOOT"
     arch_chroot "cp /boot/efi/EFI/GRUB/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI"
     arch_chroot "echo 'bcf boot add 1 fs0:\EFI\grubx64.efi \"My GRUB bootloader\" && exit' > /boot/efi/startup.sh"
     arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
