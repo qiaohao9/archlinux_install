@@ -191,6 +191,8 @@ function configure_mirrorlist() {
         print_error " Unable to update, could not download list."
     fi
 
+    pacman -Syyu --noconfirm
+
     if [[ ${RANK_MIRRORS} -eq 1 ]]; then
         pacman -S pacman-contrib --noconfirm
         cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
