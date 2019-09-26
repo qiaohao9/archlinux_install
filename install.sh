@@ -144,7 +144,7 @@ function select_mirrorlist() {
 
     PS3=${PROMPT_2}
     echo -e "Select your country:\n"
-    select v in ${countries_name[@]}; do
+    select v in "${countries_name[@]}"; do
         read_input_options $REPLY
         for OPT in ${OPTIONS[@]}; do
             country_code=${countries_code[$(( $OPT - 1 ))]}
