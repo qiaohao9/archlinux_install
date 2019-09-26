@@ -212,6 +212,24 @@ function select_device() {
     return 1
 }
 
+function format_partions() {
+    # TODO 
+    # Support LVM?
+    sgdisk --zap-all ${install_device}
+    local boot_partion="${install_device}1"
+    local system_partion="${install_device}2"
+
+    [[ ${UEFI_BIOS_TEXT} == "Boot Not Detected" ]] && print_error "Boot method isn't be detected!"
+    [[ ${UEFI_BIOS_TEXT} == "UEFI detected" ]] && printf "n\n1\n\n+512M\nef00\nw\ny\n" | gdisk ${install_device} && yes | mkfs.fat -F32 ${boot_partion}
+    [[ ${UEFI_BIOS_TEXT} == "BIOS detected" ]] && printf "n\n1\n\n+2M\nef02\nw\ny\n" | gdisk ${install_device} && yes | mkfs.ext2 ${boot_partion}
+
+    printf "n\n2\n\n\n8300\nw\ny\n"| gdisk ${install_device}
+    yes | mkfs.ext4 ${system_partion}
+
+    mount ${system_partion} /mnt
+    [[ ${UEFI_BIOS_TEXT} -eq "UEFI detected" ]] && mkdir -p /mnt/boot/efi && mount ${boot_partion} /mnt/boot/efi
+}
+
 function select_timezone() {
     print_title "HARDWARE CLOCK TIME - https://wiki.archlinux.org/index.php/Internationalization"
     print_info "This is set in /etc/adjtime. Set the hardware clock mode uniformly between your operating systems on the same machine. Otherwise, they will overwrite the time and cause clock shifts (which can cause time drift correction to be miscalibrated)."
@@ -342,17 +360,37 @@ function uefi_bios_detect() {
         if [[ -z $(mount | grep /sys/firmware/efi/efivars) ]]; then
             mount -t efivarfs efivarfs /sys/firmware/efi/efivars
         fi
-        UEFI=1
         UEFI_BIOS_TEXT="UEFI detected"
     else
-        UEFI=0
         UEFI_BIOS_TEXT="BIOS detected"
     fi
 }
 
+function bootloader_uefi() {
+    arch_chroot "pacman -S efibootmgr --noconfirm"
+    arch_chroot "grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/boot/efi"
+    arch_chroot "mkdir /boot/efi/EFI/BOOT"
+    arch_chroot "cp /boot/efi/EFI/GRUB/grubx64.efi /boot/efi/EFI/BOOT/BOOTX64.EFI"
+    arch_chroot "echo 'bcf boot add 1 fs0:\EFI\grubx64.efi \"My GRUB bootloader\" && exit' > /boot/efi/startup.sh"
+    arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+}
+
+function bootloader_bios() {
+    arch_chroot "grub-install ${INSTALL_DEVICE}2"
+    arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+}
+
+function bootloader_install() {
+    case ${UEFI_BIOS_TEXT} in
+        "UEFI detected") bootloader_uefi;;
+        "BIOS detected") bootloader_bios;;
+        *) print_error "Bootloader isn't detected.";;
+    esac
+}
+
 
 function system_install() {
-
+    format_partions
     configure_mirrorlist
 
     # Install system-base
@@ -362,6 +400,8 @@ function system_install() {
     configure_timezone
     configure_hostname
     configure_user
+
+    bootloader_install
 }
 
 function install() {
