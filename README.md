@@ -7,10 +7,10 @@ ArchLinux 自动安装脚本（inspired by [aui](https://github.com/helmuthdu/au
 # How to use it?
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_install/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_install/master/base_install.sh)"
 ```
 
-# Scripts
+# Base_install Scripts
 
 * Configure Mirrorlist
 * Configure Lanuages
