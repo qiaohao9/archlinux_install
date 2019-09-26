@@ -1,3 +1,5 @@
+![GUI](https://raw.githubusercontent.com/vastpeng/pic-storage/master/AyfjAN.png)
+
 # What's this?
 
 ArchLinux 自动安装脚本（inspired by [aui](https://github.com/helmuthdu/aui))。
