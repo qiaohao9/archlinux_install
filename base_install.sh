@@ -201,6 +201,7 @@ function configure_mirrorlist() {
         print_info "Next, Ranking mirrors will take a so long time, wait..."
         rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
         rm /etc/pacman.d/mirrorlist.tmp
+        chmod +r /etc/pacman.d/mirrorlist
     fi
 }
 
