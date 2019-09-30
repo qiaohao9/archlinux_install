@@ -126,7 +126,7 @@ UEFI_BIOS_TEXT="Boot Not Detected"
 INSTALL_DEVICE=
 MIRRORLIST_COUNTRIES=()
 RANK_MIRRORS=0
-LANGUAGES=()
+LOCALE_UTF8="en_US.UTF-8"
 ZONE=
 SUBZONE=
 HOSTNAME="archlinux"
@@ -283,39 +283,27 @@ function configure_timezone() {
     arch_chroot "hwclock --systohc --localtime"
 }
 
-function select_languages() {
+function select_locale() {
     print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
     print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
 
-    local languages=(`cat /etc/locale.gen | grep UTF-8 | sed 's/\..*$//' | sed '/@/d' | awk '{print $1}' | uniq | sed 's/#//g'`);
+    local _locale_list=(`cat /etc/locale.gen | grep UTF-8 | sed 's/\..*$//' | sed '/@/d' | awk '{print $1}' | uniq | sed 's/#//g'`);
     PS3=${PROMPT_2}
     echo -e "Select locale:\n"
-    select v in "${languages[@]}" Done; do
-        read_input_options $REPLY
-        for OPT in ${OPTIONS[@]}; do
-            language=${languages[$(( ${OPT} - 1 ))]}
-            if [[ ${language} ]]; then
-                LANGUAGES=( "${language}.UTF-8" ${LANGUAGES[@]})
-            fi
-        done
-
-        unique_elements ${LANGUAGES[@]}
-        LANGUAGES=( ${RESULT_UNIQUE_ELEMENTS[@]} )
-        if [[ ${#LANGUAGES} -eq 0 ]]; then
-            return 1
+    select _locale "${_locale_list[@]}" ; do
+        if contains_element ${_locale} "${_locale_list[@]}"; then
+            LOCALE_UTF8="${_locale}.UTF-8"
+            break
+        else
+            invalid_option
         fi
-        break
     done
 }
 
-function configure_languages() {
-    local languages_utf8=""
-    for language in "${LANGUAGES[@]}"; do
-        languages_utf8+="${language} "
-        arch_chroot "sed -i 's/#\(${language}\)/\1/' /etc/locale.gen"
-    done
+function configure_locale() {
+    arch_chroot "sed -i 's/#\(${LOCALE_UTF8}\)/\1/' /etc/locale.gen"
 
-    echo "LANG=${languages_utf8}" > "${MOUNT_POINT}/etc/locale.conf"
+    echo "LANG=${LOCALE_UTF8}" > "${MOUNT_POINT}/etc/locale.conf"
     arch_chroot "locale-gen"
 }
 
@@ -414,7 +402,7 @@ function system_install() {
 
     configure_timezone
     configure_hostname
-    configure_languages
+    configure_locale
     configure_user
 
     bootloader_install
@@ -450,7 +438,7 @@ while true; do
     echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
-    echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${LANGUAGES[*]}" )"
+    echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${LOCALE_UTF8}" )"
     echo " 5) $(mainmenu_item "${checklist[5]}"  "Set Hostname"               "${HOSTNAME}" )"
     echo " 6) $(mainmenu_item "${checklist[6]}"  "Set Root Password"          "${ROOT_PASSWORD}" )"
     echo " 7) $(mainmenu_item "${checklist[7]}"  "Set Login User"             "${USER_NAME}/${USER_PASSWORD}" )"
