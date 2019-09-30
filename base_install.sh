@@ -201,8 +201,9 @@ function configure_mirrorlist() {
         print_info "Next, Ranking mirrors will take a so long time, wait..."
         rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
         rm /etc/pacman.d/mirrorlist.tmp
-        chmod +r /etc/pacman.d/mirrorlist
     fi
+
+    chmod +r /etc/pacman.d/mirrorlist
 }
 
 function select_device() {
@@ -309,11 +310,10 @@ function select_languages() {
 
 function configure_languages() {
     local languages_utf8=""
-    for language in ${LANGUAGES[@]}; do
+    for language in "${LANGUAGES[@]}"; do
         languages_utf8+="${language} "
-        arch_chroot "sed -i 's/#\('${language}'\)/\1/' /etc/locale.gen"
+        arch_chroot "sed -i 's/#\(${language}\)/\1/' /etc/locale.gen"
     done
-    exit
 
     echo "LANG=${languages_utf8}" > "${MOUNT_POINT}/etc/locale.conf"
     arch_chroot "locale-gen"
@@ -414,6 +414,7 @@ function system_install() {
 
     configure_timezone
     configure_hostname
+    configure_languages
     configure_user
 
     bootloader_install
