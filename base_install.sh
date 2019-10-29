@@ -397,7 +397,7 @@ function system_install() {
     configure_mirrorlist
 
     # Install system-base
-    yes '' | pacstrap -i /mnt base base-devel grub os-prober openssh git zsh
+    yes '' | pacstrap -i /mnt base linux linux-firmware grub os-prober openssh git zsh
     yes '' | genfstab -U /mnt >> /mnt/etc/fstab
 
     configure_timezone
