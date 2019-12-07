@@ -432,7 +432,7 @@ uefi_bios_detect
 pause
 checklist=( 0 0 0 0 0 0 0 )
 while true; do
-    print_title "ARCHLINUX ULTIMATE INSTALL - https://github.com/vastpeng/archlinux_install"
+    print_title "ARCHLINUX ULTIMATE INSTALL - https://github.com/tinyRatP/archlinux_install"
     echo " ${UEFI_BIOS_TEXT}"
     echo ""
     echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
