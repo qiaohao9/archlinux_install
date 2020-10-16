@@ -283,23 +283,6 @@ function configure_timezone() {
     arch_chroot "hwclock --systohc --localtime"
 }
 
-function select_locale() {
-    print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
-    print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
-
-    local _locale_list=(`cat /etc/locale.gen | grep UTF-8 | sed 's/\..*$//' | sed '/@/d' | awk '{print $1}' | uniq | sed 's/#//g'`);
-    PS3=${PROMPT_2}
-    echo -e "Select locale:\n"
-    select _locale "${_locale_list[@]}" ; do
-        if contains_element ${_locale} "${_locale_list[@]}"; then
-            LOCALE_UTF8="${_locale}.UTF-8"
-            break
-        else
-            invalid_option
-        fi
-    done
-}
-
 function configure_locale() {
     arch_chroot "sed -i 's/#\(${LOCALE_UTF8}\)/\1/' /etc/locale.gen"
 
@@ -438,10 +421,9 @@ while true; do
     echo " 1) $(mainmenu_item "${checklist[1]}"  "Select Mirrors"             "${MIRRORLIST_COUNTRIES[*]}" )"
     echo " 2) $(mainmenu_item "${checklist[2]}"  "Select Device"              "${INSTALL_DEVICE}" )"
     echo " 3) $(mainmenu_item "${checklist[3]}"  "Select Timezone"            "${ZONE}/${SUBZONE}" )"
-    echo " 4) $(mainmenu_item "${checklist[4]}"  "Select Locale-UTF8"         "${LOCALE_UTF8}" )"
-    echo " 5) $(mainmenu_item "${checklist[5]}"  "Set Hostname"               "${HOSTNAME}" )"
-    echo " 6) $(mainmenu_item "${checklist[6]}"  "Set Root Password"          "${ROOT_PASSWORD}" )"
-    echo " 7) $(mainmenu_item "${checklist[7]}"  "Set Login User"             "${USER_NAME}/${USER_PASSWORD}" )"
+    echo " 5) $(mainmenu_item "${checklist[4]}"  "Set Hostname"               "${HOSTNAME}" )"
+    echo " 6) $(mainmenu_item "${checklist[5]}"  "Set Root Password"          "${ROOT_PASSWORD}" )"
+    echo " 7) $(mainmenu_item "${checklist[6]}"  "Set Login User"             "${USER_NAME}/${USER_PASSWORD}" )"
     echo ""
     echo " i) install"
     echo " q) quit"
@@ -453,10 +435,9 @@ while true; do
             1) select_mirrorlist && checklist[1]=1;;
             2) select_device && checklist[2]=1;;
             3) select_timezone && checklist[3]=1;;
-            4) select_languages && checklist[4]=1;;
-            5) set_hostname && checklist[5]=1;;
-            6) set_root_password && checklist[6]=1;;
-            7) set_login_user && checklist[7]=1;;
+            4) set_hostname && checklist[5]=1;;
+            5) set_root_password && checklist[6]=1;;
+            6) set_login_user && checklist[7]=1;;
             "i") install;;
             "q") exit 0;;
             *) invalid_option;;
