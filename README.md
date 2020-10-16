@@ -9,7 +9,7 @@ ArchLinux 自动安装脚本（UI is inspired by [aui](https://github.com/helmut
 # How to use it?
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vastpeng/archlinux_install/master/base_install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/tinyratp/archlinux_install/master/base_install.sh)"
 ```
 
 # base_install Scripts
