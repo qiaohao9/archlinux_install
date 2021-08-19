@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/vastpeng/pic-storage/master/ND6Zjw.png)
+> [archinstall](https://github.com/archlinux/archinstal) is maintainered by archlinux
 
 # What's this?
 
